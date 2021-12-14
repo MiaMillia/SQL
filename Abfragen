@@ -1,0 +1,64 @@
+Auswahl aller Zutaten eines Rezeptes nach Rezeptname
+
+SELECT z.BEZEICHNUNG, z.EINHEIT, z.NETTOPREIS, z.KALORIEN, z.KOHLENHYDRATE, z.PROTEIN, rz.MENGE
+FROM zutat z INNER JOIN rezeptzutat rz
+ON z.ZUTATENNR = rz.ZUTATENNR
+JOIN rezept r
+ON rz.REZEPTNR = r.REZEPTNR
+WHERE r.REZEPTNAME LIKE '%Lach%';
+
+Auswahl aller Rezepte einer bestimmten Ernährungskategorie
+
+SELECT r.REZEPTNAME
+FROM rezept r INNER JOIN rezeptkategorie rk
+ON r.REZEPTNR = rk.REZEPTNR
+JOIN ernaehrungskategorie ek
+ON rk.ERNAEHRUNGSNR = ek.ERNAEHRUNGSNR
+WHERE ek.KATEGORIENAME LIKE '%Vegan%';
+
+Auswahl aller Rezepte, die eine gewisse Zutat enthalten
+
+SELECT r.REZEPTNAME, r.ANLEITUNG
+FROM rezept r
+INNER JOIN rezeptzutat rz
+ON r.REZEPTNR = rz.REZEPTNR
+INNER JOIN zutat z
+ON rz.ZUTATENNR = z.ZUTATENNR 
+WHERE z.BEZEICHNUNG LIKE '%kartof%';
+
+Berechnung der durchschnittlichen Nährwerte aller Bestellungen eines Kunden
+
+SELECT b.KUNDENNR, COUNT(*) 'Anzahl Zutaten', AVG(z.KALORIEN)'Durchschnittliche NÃ¤hrwerte'
+FROM bestellung b
+INNER JOIN bestellungzutat bz
+ON b.BESTELLNR = bz.BESTELLNR
+INNER JOIN zutat z
+ON z.ZUTATENNR = bz.ZUTATENNR
+WHERE b.KUNDENNR = 2004
+GROUP BY b.KUNDENNR;
+
+Auswahl aller Zutaten, die bisher keinem Rezept zugeordnet sind
+
+SELECT z.ZUTATENNR, z.BEZEICHNUNG,r.REZEPTNR 
+FROM rezept r
+RIGHT JOIN rezeptzutat rz ON r.REZEPTNR = rz.REZEPTNR
+RIGHT JOIN zutat z ON rz.ZUTATENNR = z.ZUTATENNR
+WHERE rz.REZEPTNR IS NULL;
+
+Auswahl aller Rezepte, die eine bestimmte Kalorienmenge nicht überschreiten 
+
+SELECT (rezeptzutat.REZEPTNR), SUM(zutat.KALORIEN)'Gesamtkalorien'
+FROM zutat
+INNER JOIN rezeptzutat 
+ON zutat.ZUTATENNR = rezeptzutat.ZUTATENNR
+GROUP BY rezeptzutat.REZEPTNR
+HAVING Gesamtkalorien <500
+ORDER BY Gesamtkalorien DESC;
+
+Auswahl aller Rezepte, die mehr als fünf Zutaten enthalten 
+
+SELECT (r.REZEPTNAME), COUNT(rz.ZUTATENNR)'ZUTATENANZAHL'
+FROM rezeptzutat rz JOIN rezept r ON rz.REZEPTNR = r.REZEPTNR
+GROUP BY rz.REZEPTNR
+HAVING COUNT(rz.ZUTATENNR)>5
+ORDER BY ZUTATENANZAHL;
